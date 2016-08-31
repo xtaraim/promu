@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -54,15 +55,22 @@ func runCrossbuildTarballs() {
 		if platform := strings.Split(dir.Name(), "-"); len(platform) == 2 {
 			os.Setenv("GOOS", platform[0])
 			os.Setenv("GOARCH", platform[1])
+			defer os.Unsetenv("GOOS")
+			defer os.Unsetenv("GOARCH")
 		} else {
 			if err := fmt.Errorf("bad .build/%s directory naming, should be <GOOS>-<GOARCH>", platform); err != nil {
 				fatal(err)
 			}
 		}
 
-		runTarball(filepath.Join(".build", dir.Name()))
+		tarball := runTarball(filepath.Join(".build", dir.Name()))
+		// @TODO sha256 sum of tarball
+		// store it in a file alongside with the tarball name
+		data, err := ioutil.ReadFile(tarball)
+		if err != nil {
+			// warning or ??
+		}
+		checksum := sha256.Sum256(data)
+		fmt.Println(checksum)
 	}
-
-	defer os.Unsetenv("GOOS")
-	defer os.Unsetenv("GOARCH")
 }

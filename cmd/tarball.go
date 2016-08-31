@@ -44,7 +44,7 @@ func init() {
 	viper.BindPFlag("tarball.prefix", tarballCmd.Flags().Lookup("prefix"))
 }
 
-func runTarball(binariesLocation string) {
+func runTarball(binariesLocation string) string {
 	defer shell.ErrExit()
 	shell.Tee = os.Stdout
 
@@ -95,4 +95,6 @@ func runTarball(binariesLocation string) {
 	tar := fmt.Sprintf("%s.tar.gz", name)
 	fmt.Println(" >  ", tar)
 	sh("tar zcf", shell.Path(prefix, tar), "-C", tmpDir, name)
+	// check for error
+	return shell.Path(prefix, tar)
 }
